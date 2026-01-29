@@ -2,7 +2,7 @@ Use the video API to retrieve video frames from a capture device.
 
 
 Currently depends on the state of zephyr at
-
+https://github.com/zephyrproject-rtos/zephyr/pull/101754
 
 
 Description
