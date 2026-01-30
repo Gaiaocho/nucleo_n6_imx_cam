@@ -162,7 +162,7 @@ static int app_query_video_info(const struct device *const video_dev,
 		return ret;
 	}
 
-	LOG_INF("- Capabilities:");
+	/*LOG_INF("- Capabilities:");
 	for (int i = 0; caps->format_caps[i].pixelformat; i++) {
 		const struct video_format_cap *fcap = &caps->format_caps[i];
 
@@ -171,6 +171,7 @@ static int app_query_video_info(const struct device *const video_dev,
 			fcap->width_min, fcap->width_max, fcap->width_step,
 			fcap->height_min, fcap->height_max, fcap->height_step);
 	}
+	*/
 
 	/* Get default/native format */
 	ret = video_get_format(video_dev, fmt);
@@ -335,6 +336,7 @@ static int app_setup_video_buffers(const struct device *const video_dev,
 
 int main(void)
 {
+	int frame_no = 0;
 	const struct device *const video_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_camera));
 	const struct device *const display_dev = DEVICE_DT_GET_OR_NULL(DT_CHOSEN(zephyr_display));
 	struct video_buffer *vbuf = &(struct video_buffer){};
@@ -399,7 +401,7 @@ int main(void)
 	LOG_INF("Capture started");
 
 	vbuf->type = VIDEO_BUF_TYPE_OUTPUT;
-	while (1) {
+	while (frame_no < 1) {
 		ret = video_dequeue(video_dev, &vbuf, K_FOREVER);
 		if (ret < 0) {
 			LOG_ERR("Unable to dequeue video buf");
@@ -408,6 +410,10 @@ int main(void)
 
 		LOG_INF("Got frame %u! size: %u; timestamp %u ms",
 			frame++, vbuf->bytesused, vbuf->timestamp);
+
+		LOG_INF("buffer: %p , size: %d , bytesused: %d", vbuf->buffer,
+				vbuf->bytesused, vbuf->size);
+
 
 		if (DT_HAS_CHOSEN(zephyr_display)) {
 			ret = app_display_frame(display_dev, vbuf, &fmt);
@@ -421,6 +427,8 @@ int main(void)
 			LOG_ERR("Unable to requeue video buf");
 			goto err;
 		}
+
+		frame_no++;
 	}
 
 err:
